@@ -16,15 +16,51 @@ public class PlayerSkyboxData {
     public Player player;
     public PlayerSkybox renderedPlayerSkybox;
 
+    // While true the client is still loading into a world (join / world change / far teleport),
+    // so no skybox may be rendered - packets sent during the switch land in the wrong world.
+    private volatile boolean worldLoading;
+    private volatile int loadEpoch;
+
     public PlayerSkyboxData(Player player) {
         this.player = player;
         this.playerSkyboxes = new PriorityQueue<>();
+        this.worldLoading = true;
         if (SkyboxEngine.getConfigInstance().getDefaultSkybox() != null && !SkyboxEngine.getConfigInstance().getDefaultSkybox().isBlank()) {
             addDefaultSkybox();
         }
     }
 
+    public boolean isWorldLoading() {
+        return worldLoading;
+    }
+
+    public int getLoadEpoch() {
+        return loadEpoch;
+    }
+
+    /**
+     * Marks the player as mid world-load and despawns the rendered skybox.
+     * Returns the new load epoch, used to invalidate stale fallback tasks
+     * when teleports chain (e.g. lobby -> dungeon instance).
+     */
+    public int beginWorldLoading() {
+        worldLoading = true;
+        loadEpoch++;
+        if (renderedPlayerSkybox != null) {
+            renderedPlayerSkybox.removeSkybox();
+            renderedPlayerSkybox = null;
+        }
+        return loadEpoch;
+    }
+
+    public void endWorldLoading() {
+        worldLoading = false;
+    }
+
     public void tick() {
+        if (worldLoading) {
+            return;
+        }
         if (renderedPlayerSkybox != null) {
             renderedPlayerSkybox.tickSkybox();
         }
@@ -84,6 +120,16 @@ public class PlayerSkyboxData {
     }
 
     public void changeRenderedPlayerSkybox(boolean force) {
+        // Never spawn while the client is still loading in - the skybox would
+        // render in the world the player came from. WorldSkyboxListener re-renders
+        // once the destination is confirmed loaded.
+        if (worldLoading) {
+            if (renderedPlayerSkybox != null) {
+                renderedPlayerSkybox.removeSkybox();
+                renderedPlayerSkybox = null;
+            }
+            return;
+        }
         ActiveSkybox skybox = playerSkyboxes.peek();
 
 

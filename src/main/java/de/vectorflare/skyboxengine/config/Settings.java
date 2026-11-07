@@ -32,6 +32,11 @@ public final class Settings {
     private Map<String,String> biomeSkyboxes = new HashMap<>();
     private int biomeCheckInterval = 20;
 
+    @Comment({"Skyboxes are only applied once the client confirms it loaded into the destination world.",
+            "This is the fallback delay (in ticks) after a join/world change/long-distance teleport",
+            "before the skybox is applied anyway, in case no chunk-load confirmation arrives."})
+    private int worldLoadTimeoutTicks = 40;
+
 
     @Comment("Configurable to solve Conflicts with skyboxes activated through the API")
     private int dimensionSkyboxPriority = 150;
