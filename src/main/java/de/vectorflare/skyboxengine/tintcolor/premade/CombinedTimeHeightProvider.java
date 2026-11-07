@@ -13,7 +13,9 @@ public class CombinedTimeHeightProvider implements TintProvider {
 
     @Override
     public Color getTintColor(Player player, Settings.SkyboxSettings skyboxSettings) {
-        long time = player.getWorld().getTime();
+        // The player's own clock (= world time unless setPlayerTime / a time-lock plugin
+        // overrides it), so the skybox sun matches the sun this player actually sees.
+        long time = Math.floorMod(player.getPlayerTime(), 24000L);
         int red = (int) (((time % 24000f) / 24000f) * 255f);
 
 

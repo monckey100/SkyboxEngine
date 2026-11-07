@@ -64,7 +64,7 @@ public class PlayerSkybox {
         ItemDisplays.setDisplaySize(skyboxEntity,getSize());
         ItemDisplays.setDisplayRenderDistance(skyboxEntity,1000);
         ItemDisplays.setDisplayTeleportInterpolation(skyboxEntity,getInterpolationDuration());
-        ItemDisplays.setDisplayColor(skyboxEntity,getColor());
+        ItemDisplays.setDisplayColor(skyboxEntity, tintProvider != null ? tintProvider.getTintColor(player,settings) : getColor());
         if (settings.isUseMountMovementSync()) {
             WrapperPlayServerSetPassengers wrapperPlayServerSetPassengers = new WrapperPlayServerSetPassengers(player.getEntityId(),new int[]{skyboxEntity.getEntityId()});
             skyboxEntity.sendPacketsToViewers(wrapperPlayServerSetPassengers);
@@ -77,16 +77,16 @@ public class PlayerSkybox {
         spawn.setYaw(0);
         ItemDisplays.setDisplaySize(skyboxEntity,getSize());
         ItemDisplays.setDisplayTransformationInterpolation(skyboxEntity,getInterpolationDuration());
-        ItemDisplays.setDisplayColor(skyboxEntity,getColor());
         if (player.getLocation().distanceSquared(ConversionUtils.toBukkitLocation(skyboxEntity.getLocation(), player.getWorld())) > Math.pow(getBaseSize() * 0.5,2)) {
             removeSkybox();
             createSkybox();
             return;
         }
 
-        if (tintProvider != null) {
-            ItemDisplays.setDisplayColor(skyboxEntity, tintProvider.getTintColor(player,settings));
-        }
+        // One colour per tick: the tint provider's (e.g. "daytime" = day time for the shader's
+        // DayTimePrecise) or plain white. Setting white first and then the tint sent two item
+        // updates per tick and let the white one reach the client.
+        ItemDisplays.setDisplayColor(skyboxEntity, tintProvider != null ? tintProvider.getTintColor(player,settings) : getColor());
         ItemDisplays.teleportDisplay(skyboxEntity,spawn);
     }
 
