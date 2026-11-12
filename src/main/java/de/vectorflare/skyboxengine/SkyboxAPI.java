@@ -150,6 +150,22 @@ public class SkyboxAPI {
     }
 
     /**
+     * Adds a registered skybox to a player by its id (for plugins without a compile dependency).
+     * @return false when the id is not registered
+     */
+    public boolean addSkyboxToPlayer(Player player, String skybox, int priority) {
+        Settings.SkyboxSettings settings = getSkyboxSettings(skybox);
+        if (settings == null) return false;
+        addSkyboxToPlayer(player, settings, priority);
+        return true;
+    }
+
+    /** The "show" tint provider's value for this player (0..255, the blue channel of a conducted skybox). */
+    public void setShowValue(Player player, int value) {
+        de.vectorflare.skyboxengine.tintcolor.premade.ShowProvider.set(player, value);
+    }
+
+    /**
      * Registers a new tint provider for skybox models. This should be called before players are able to join the server to ensure the provider is available on join.
      * @param tintProvider The tint provider instance you want to register
      */

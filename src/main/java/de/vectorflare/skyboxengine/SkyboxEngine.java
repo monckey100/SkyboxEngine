@@ -103,6 +103,7 @@ public final class SkyboxEngine extends JavaPlugin {
         tintProviders = new TintProviders();
 
         SkyboxAPI.getAPI().registerTintProvider(new TimeProvider());
+        SkyboxAPI.getAPI().registerTintProvider(new de.vectorflare.skyboxengine.tintcolor.premade.ShowProvider());
         SkyboxAPI.getAPI().registerTintProvider(new LowPrecisionTimeProvider());
         SkyboxAPI.getAPI().registerTintProvider(new PlayerHeightProvider());
         SkyboxAPI.getAPI().registerTintProvider(new CombinedTimeHeightProvider());
